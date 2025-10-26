@@ -1,0 +1,1008 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Rongtuli — Smart AI Search</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    /* ---------- Your original styles (unchanged) ---------- */
+    body {
+      font-family: "Inter", system-ui, Arial;
+      background: #f6f8fb;
+      color: #143047;
+      margin: 0;
+      padding: 18px;
+    }
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+  .search-bar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 12px;
+  position: relative;
+  background: #ffffff; /* slightly contrasting background */
+  padding: 8px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(16,24,40,0.06);
+  transition: box-shadow 0.2s ease;
+}
+
+.search-bar:hover {
+  box-shadow: 0 6px 18px rgba(16,24,40,0.1);
+}
+
+.search-bar input {
+  flex: 1;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid #e6eef7;
+  font-size: 16px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-bar input:focus {
+  outline: none;
+  border-color: #6aa8d6;
+  box-shadow: 0 4px 12px rgba(106,168,214,0.25);
+}
+
+.search-bar button {
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 0;
+  background: #6aa8d6;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.search-bar button:hover {
+  background: #5a92c0;
+  transform: scale(1.05);
+}
+
+.search-bar .clear {
+  background: #fff;
+  border: 1px solid #e6eef7;
+  color: #7092b0;
+  font-weight: 600;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.search-bar .clear:hover {
+  background: #f1f8ff;
+  border-color: #7092b0;
+  color: #7092b0;
+  transform: scale(1.05);
+}
+
+
+    /* Suggestions dropdown */
+    .suggestions {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      right: 0;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 8px 30px rgba(16,24,40,0.08);
+      max-height: 260px;
+      overflow:auto;
+      z-index: 999;
+      border: 1px solid #eef4fb;
+    }
+    .suggestion-item {
+      padding: 10px 12px;
+      cursor: pointer;
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      align-items:center;
+      font-weight:600;
+    }
+    .suggestion-item:hover, .suggestion-item.active { background:#f1f8ff; }
+
+    .results {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .product-card {
+      width: 220px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 8px 26px rgba(16,24,40,0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      cursor: pointer;
+    }
+    .product-thumb {
+      height: 140px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #f6f8fb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .product-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .product-name {
+      font-weight: 800;
+      color: #7092b0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .product-price {
+      font-weight: 800;
+      color: #143047a9;
+    }
+    .add-btn {
+      background: #6aa8d6;
+      color: white;
+      border: 0;
+      padding: 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 800;
+    }
+    .meta {
+      font-size: 13px;
+      color: #6b7280;
+    }
+    .small {
+      font-size: 13px;
+      color: #6b7280;
+      margin-top: 8px;
+    }
+
+    /* "no results" + suggested alternatives box */
+    .no-results {
+      background: #fff;
+      padding: 14px;
+      border-radius: 12px;
+      box-shadow: 0 8px 26px rgba(16,24,40,0.06);
+      color: #6b7280;
+      width:100%;
+    }
+
+    @media (max-width:720px){
+      .product-card { width: calc(50% - 12px); }
+    }
+    @media (max-width:420px){
+      .product-card { width: 100%; }
+
+    }
+
+
+    .header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem 0;
+  }
+
+      .logo { height: 90px; max-width: 100%; }
+
+ /* Keep desktop look even on mobile */
+.navbar {
+  background-color: #dce4cc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap; /* stop breaking into multiple lines */
+  gap: 1.5rem;
+  padding: 0.7rem 1rem;
+  border-radius: 13px;
+  margin: 0 auto;
+  width: fit-content;
+  overflow-x: auto; /* allow horizontal scroll if needed */
+  scrollbar-width: none; /* hide scrollbar (Firefox) */
+  -ms-overflow-style: none; /* hide scrollbar (IE/Edge) */
+}
+.navbar::-webkit-scrollbar { display: none; } /* hide scrollbar (Chrome/Safari) */
+
+.navbar a {
+  text-decoration: none;
+  font-weight: 600;
+  color: #415a4a;
+  font-size: 1rem;
+  transition: color 0.2s ease;
+}
+
+/* hover + visited fix */
+.navbar a:hover {
+  color: #2f4436;
+}
+.navbar a:visited,
+.navbar a:active,
+.navbar a:focus {
+  color: #415a4a;
+  text-decoration: none;
+}
+
+/* Optional: reduce gap slightly on smaller screens */
+@media (max-width: 500px) {
+  .navbar {
+    gap: 1rem;
+    padding: 0.6rem 0.8rem;
+  }
+  .navbar a {
+    font-size: 0.9rem;
+  }
+}
+
+footer{max-width:1000px;margin:28px auto;text-align:center;color:#7b8794}
+
+    /* ---------- Cart styles copied from your product page (kept intact) ---------- */
+    :root{
+      --card:#fff;
+      --accent:#6aa8d6;
+      --accent-dark:#6aa8d6;
+      --muted:#7b8794;
+      --text:#7092b0;
+      --radius:14px;
+      --card-radius:12px;
+      --shadow:0 8px 26px rgba(16,24,40,0.06);
+      --soft-shadow:0 6px 18px rgba(15,30,40,0.06);
+      --cart-width:340px;
+
+      --cart-offset-desktop: 60px;
+      --cart-offset-mobile-right: 12px;
+      --cart-offset-mobile-left: 40px;
+      --toggle-width: 92px;
+      --toggle-gap: 8px;
+    }
+
+    /* --- CART TOGGLE --- */
+    #cart-toggle {
+      position: fixed;
+      right: var(--cart-offset-desktop);
+      top: 22px;
+      background: var(--accent);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+      cursor: pointer;
+      z-index: 12000;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+      transition: all 0.18s ease;
+    }
+    #cart-toggle:hover { background: var(--accent-dark); transform: translateY(-2px); }
+    #cart-toggle .count { background: #fff; color: var(--accent-dark); padding: 2px 8px; border-radius: 999px; font-weight: 700; font-size: 12px; }
+
+    /* cart panel (block layout) */
+    #cart {
+      position: fixed;
+      right: var(--cart-offset-desktop);
+      top: 70px;
+      width: var(--cart-width);
+      max-width: calc(100% - 40px);
+      max-height: calc(100vh - 96px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      background: #fff;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+      z-index: 11000;
+      transition: transform 0.22s ease, opacity 0.22s ease;
+      display: block;
+      -webkit-overflow-scrolling: touch;
+    }
+    #cart.hidden { transform: translateY(-10px) scale(0.98); opacity: 0; pointer-events: none; display: none; }
+
+    /* Default cart text styles */
+    #cart h2 { margin: 0 0 12px 0; font-size: 18px; color: #143047; }
+    #cart p { margin: 8px 0; font-weight: 700; color: #143047; }
+
+    /* cart rows */
+    #cart-rows > .cart-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+      min-height: 56px;
+    }
+    #cart-rows > .cart-row:last-child { border-bottom: none; margin-bottom: 0; }
+
+    #cart .cart-img { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; flex: 0 0 56px; background: #f2f4f6; }
+
+    #cart .cart-text { flex: 1 1 auto; min-width: 0; }
+    #cart .cart-text > div:first-child { font-weight: 800; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #143047; }
+    #cart .cart-text > div:last-child { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+    #cart .cart-controls { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; flex: 0 0 auto; margin-left: 8px; }
+
+    .small-btn { background: transparent; border: 1px solid rgba(16,24,40,0.06); padding: 6px 8px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 13px; }
+    .small-btn.icon { min-width:36px; padding:6px 10px; text-align:center; }
+    .small-btn:active { transform: translateY(1px); }
+
+    /* footer layout: checkout + close button (close moved here) */
+    .cart-footer { margin-top: 12px; display: flex; gap: 8px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+    .cart-footer .checkout-wrap { flex: 1 1 100%; }
+    #checkout-btn { background: linear-gradient(180deg,var(--accent),var(--accent-dark)); color: white; border: none; padding: 12px 14px; border-radius: 10px; cursor: pointer; font-weight: 800; width: 70%; box-shadow: 0 8px 18px rgba(106,168,214,0.16); }
+    #cart-close-footer { background: transparent; border: 1px solid rgba(16,24,40,0.08);  padding: 12px 14px;  border-radius: 10px; cursor: pointer; font-weight: 700; color: #143047; white-space: nowrap; }
+
+    #subtotal, #shipping, #total { margin: 8px 0; font-weight: 600; color: var(--muted); font-size: 14px; }
+    #total { color: #143047; font-size: 16px; }
+
+    /* ensure no horizontal scroll inside cart */
+    #cart { overflow-y: auto; overflow-x: hidden; }
+
+    /* -------------------------- MOBILE -------------------------- */
+    @media (max-width: 900px) {
+      .top { flex-direction: column; align-items: center; }
+      .gallery, .info { width: 100%; box-sizing: border-box; }
+      .gallery img { max-height: 260px; }
+      .thumbs img { width: 60px; height: 60px; }
+
+      .add-row { flex-direction: column; align-items: stretch; }
+      .qty { justify-content: center; }
+      .btn-add { width: 100%; text-align: center; }
+
+     #cart {
+        right: 12px;
+        width: calc(100% - 24px);
+        top: auto;
+        bottom: 90px;
+      }
+      /* place toggle outside the cart on the right */
+      #cart-toggle {
+        top: auto;
+        bottom: 22px;
+        right: var(--cart-offset-mobile-right);
+        padding: 12px 16px;
+        z-index: 13000;
+        width: var(--toggle-width);
+        justify-content: center;
+      }
+
+      .cart-footer { gap: 10px; }
+      .cart-footer .checkout-wrap { flex: 1 1 100%; }
+      #checkout-btn { width: 100%; }
+      #cart-close-footer { width: 100%; }
+    }
+
+    @media (max-width: 600px) {
+      body { font-size: 15px; }
+      .wrap { padding: 0 12px; }
+      .gallery img { max-height: 200px; }
+      .thumbs img { width: 52px; height: 52px; }
+      #cart { padding: 12px; max-height: calc(100vh - 110px); }
+
+      #cart .cart-row { gap: 10px; padding: 8px 0; min-height: 48px; }
+      #cart .cart-img { width: 48px; height: 48px; flex: 0 0 48px; }
+      .small-btn { padding: 6px 6px; font-size: 12px; }
+
+      /* controls become horizontal under the text */
+      #cart .cart-controls {
+        width: 100%;
+        margin-left: 0;
+        align-items: flex-start;
+        flex-direction: row;
+        gap: 8px;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        margin-top: 8px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .product-card { padding: 10px; }
+      .product-image { height: 120px; }
+      .btn-add { font-size: 14px; padding: 8px; }
+      #cart h2 { font-size: 16px; }
+      #cart .cart-text > div:first-child { font-size: 13px; }
+      #checkout-btn { padding: 10px 12px; font-size: 15px; }
+      #cart-close-footer { padding: 10px 12px; font-size: 14px; }
+    }
+
+    /* Helpful debug (uncomment while you test) */
+    /* #cart { outline: 2px dashed rgba(0,0,0,0.06); } */
+    /* #cart-toggle { outline: 2px dashed rgba(255,0,0,0.12); } */
+  </style>
+</head>
+<body>
+      <header class="header">
+<a href="public.html">
+  <img src="assets/logo.png" alt="Rongtuli Logo" class="logo" />
+</a>  </header>
+
+  <nav class="navbar">
+    <a href="#">Sarees</a>
+    <a href="#">Creams</a>
+    <a href="#">Hair Bands</a>
+    
+  </nav>
+
+  <div class="wrap">
+    <a href="#" 
+   style="text-decoration:none;color:var(--muted)" 
+   onclick="(function(e){
+     e.preventDefault();
+     try {
+       // if there's a previous page in history -> go back
+       if (history.length > 1) {
+         history.back();
+       } else {
+         // fallback if opened directly / no history
+         window.location.href = 'public.html';
+       }
+     } catch(err) {
+       // fallback on error
+       window.location.href = 'public.html';
+     }
+   })(event);">
+  ← Go Back
+</a>
+<h2 style="color: #7092b0;">Smart AI Search</h2>
+
+    <div class="search-bar">
+      <input id="aiQuery" placeholder="Type something like 'Dreses, Wears'..." autocomplete="off" aria-autocomplete="list" />
+      <button id="searchBtn">Search</button>
+      <button id="clearBtn" class="clear">Clear</button>
+
+      <!-- suggestions dropdown -->
+      <div id="suggestions" class="suggestions" style="display:none"></div>
+    </div>
+
+    <div id="status" class="small">Loading products...</div>
+    <div id="results" class="results" style="margin-top:12px"></div>
+  </div>
+
+  <!-- ---------- Cart UI inserted (copied) ---------- -->
+  <button id="cart-toggle" aria-expanded="false" title="Open cart">Cart <span class="count">0</span></button>
+
+  <div id="cart" class="hidden" aria-hidden="true">
+    <h2>Your Cart</h2>
+
+    <div id="cart-rows">Cart is empty.</div>
+
+    <div class="cart-footer">
+      <div class="checkout-wrap">
+        <p id="subtotal">Subtotal: QAR 0.00</p>
+        <p id="shipping">Shipping: QAR 0.00</p>
+        <p id="total">Total: QAR 0.00</p>
+        <button id="checkout-btn">Checkout via WhatsApp</button>
+           <button id="cart-close-footer" type="button">Close</button>
+ </div>
+    </div>
+  </div>
+  <!-- ---------- end cart UI ---------- -->
+
+<div><footer id="foot">© <span id="year"></span> Rongtuli</footer></div>
+
+  <!-- Scripts -->
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    // Use a reliable Fuse CDN
+    const FUSE_URL = 'https://unpkg.com/fuse.js@6.6.2/dist/fuse.min.js';
+
+    const SUPABASE_URL = 'https://qhslurjvanppitwuuxtv.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFoc2x1cmp2YW5wcGl0d3V1eHR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NTg0MjEsImV4cCI6MjA3NjUzNDQyMX0.8PNOewgJFDGVVIDdiEbdFE2x9Yzv29o2kdAANqaW1gA';
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let products = [];
+    let fuse = null;
+
+    const resultsEl = document.getElementById('results');
+    const statusEl = document.getElementById('status');
+    const searchInput = document.getElementById('aiQuery');
+    const suggestionsEl = document.getElementById('suggestions');
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // small debounce helper
+    function debounce(fn, wait = 250) {
+      let t;
+      return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), wait); };
+    }
+
+    async function loadFuse() {
+      if (window.Fuse) return;
+      await new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = FUSE_URL;
+        s.onload = resolve;
+        s.onerror = () => reject(new Error('Failed to load Fuse.js from CDN'));
+        document.head.appendChild(s);
+      });
+    }
+
+    async function loadProducts() {
+      statusEl.textContent = 'Loading products ...';
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('id, name, description, category, price, sku, image_urls')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error(error);
+          statusEl.textContent = 'Error loading products.';
+          products = [];
+          return;
+        }
+
+        products = (data || []).map(p => ({
+          id: p.id,
+          name: p.name || '',
+          description: p.description || '',
+          category: p.category || '',
+          price: p.price || 0,
+          sku: p.sku || '',
+          image: (p.image_urls && p.image_urls[0]) ? p.image_urls[0] : ''
+        }));
+
+        await loadFuse();
+        fuse = new window.Fuse(products, {
+          includeScore: true,
+          shouldSort: true,
+          threshold: 0.45, // fuzzy sensitivity
+          keys: [
+            { name: 'name', weight: 0.5 },
+            { name: 'description', weight: 0.3 },
+            { name: 'category', weight: 0.1 },
+            { name: 'sku', weight: 0.1 }
+          ]
+        });
+
+        statusEl.textContent = `Loaded ${products.length} products. Type a natural query!`;
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = 'Failed to load product data.';
+      }
+    }
+
+    // AI rewriter: convert user phrase to keywords (fallbacks to plain text on error)
+    async function rewriteQueryWithAI(userInput) {
+  try {
+    const res = await fetch('https://rongtuli-smoky.vercel.app//api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // optional secret token if you set one on backend:
+        //'x-frontend-token': 'rongtuli123'
+      },
+      body: JSON.stringify({
+        message: `You are a shopping assistant. Convert this user search phrase into short keyword phrases (comma-separated). Return only the keywords, no extra text.\n\n${userInput}`
+      })
+    });
+
+    const data = await res.json();
+    // backend should return { reply: "keywords,here" } or fallback
+    return data.reply || userInput;
+  } catch (err) {
+    console.warn('AI rewrite failed, using raw input', err);
+    return userInput;
+  }
+}
+
+    // Create suggestions from partial input using Fuse (fast)
+    function getLiveSuggestions(partial, limit = 8) {
+      if (!partial || !fuse) return [];
+      const res = fuse.search(partial, { limit });
+      // return unique names + categories (short)
+      const seen = new Set();
+      const suggestions = [];
+      for (const r of res) {
+        const item = r.item;
+        const name = item.name || '';
+        if (name && !seen.has(name.toLowerCase())) {
+          suggestions.push({ text: name, item });
+          seen.add(name.toLowerCase());
+        }
+        if (item.category && !seen.has(item.category.toLowerCase())) {
+          suggestions.push({ text: item.category, item: null });
+          seen.add(item.category.toLowerCase());
+        }
+        if (suggestions.length >= limit) break;
+      }
+      return suggestions;
+    }
+
+    // render suggestion dropdown
+    let suggestionIndex = -1;
+    function showSuggestions(list) {
+      suggestionsEl.innerHTML = '';
+      suggestionIndex = -1;
+      if (!list || list.length === 0) { suggestionsEl.style.display = 'none'; return; }
+      list.forEach((s, idx) => {
+        const div = document.createElement('div');
+        div.className = 'suggestion-item';
+        div.textContent = s.text;
+        const countSpan = document.createElement('span');
+        countSpan.style.fontSize = '12px';
+        countSpan.style.color = '#6b7280';
+        countSpan.textContent = s.item ? (s.item.category || '') : '';
+        div.appendChild(countSpan);
+        div.addEventListener('click', () => {
+          searchInput.value = s.text;
+          suggestionsEl.style.display = 'none';
+          doSearch(s.text);
+        });
+        suggestionsEl.appendChild(div);
+      });
+      suggestionsEl.style.display = 'block';
+    }
+
+    // keyboard navigation for suggestions
+    function moveSuggestion(delta) {
+      const items = suggestionsEl.querySelectorAll('.suggestion-item');
+      if (!items.length) return;
+      suggestionIndex = Math.max(0, Math.min(items.length - 1, suggestionIndex + delta));
+      items.forEach((it, i) => it.classList.toggle('active', i === suggestionIndex));
+      if (items[suggestionIndex]) {
+        // set input value live to show selection
+        searchInput.value = items[suggestionIndex].firstChild.textContent;
+      }
+    }
+
+    // main search (uses AI rewrite then Fuse)
+    async function doSearch(q) {
+      q = (q || '').trim();
+      suggestionsEl.style.display = 'none';
+      if (!q) {
+        renderResults([]);
+        statusEl.textContent = 'Enter search text.';
+        return;
+      }
+
+      statusEl.textContent = `Thinking about: "${q}"...`;
+
+      const aiQuery = await rewriteQueryWithAI(q);
+      let hits = [];
+      if (fuse) {
+        // try an exact-ish search first
+        hits = fuse.search(aiQuery, { limit: 50 }).map(r => ({ ...r.item, score: r.score }));
+      } else {
+        const term = aiQuery.toLowerCase();
+        hits = products.filter(p =>
+          (p.name + ' ' + p.description + ' ' + p.category)
+            .toLowerCase()
+            .includes(term)
+        ).slice(0, 50);
+      }
+
+      if (!hits || hits.length === 0) {
+        // no exact hits -> show no-results but also show CLOSE matches using looser threshold
+        statusEl.textContent = `No exact matches for "${q}". Showing closest alternatives.`;
+        // fallback: run Fuse again with relaxed threshold and return top 6
+        if (fuse) {
+          // temporarily create a new Fuse with looser threshold
+          const loose = new window.Fuse(products, { keys: ['name','description','category'], threshold: 0.7 });
+          const alt = loose.search(q, { limit: 12 }).map(r => r.item);
+          renderNoResultsWithAlternatives(q, alt);
+        } else {
+          renderNoResultsWithAlternatives(q, []);
+        }
+        return;
+      }
+
+      statusEl.textContent = `Found ${hits.length} results for "${q}".`;
+      renderResults(hits.map(h => ({ ...h })));
+    }
+
+    function renderNoResultsWithAlternatives(q, alternatives) {
+      resultsEl.innerHTML = '';
+      const box = document.createElement('div');
+      box.className = 'no-results';
+      box.innerHTML = `<div style="font-weight:800;margin-bottom:6px">No matching items found for "<em>${escapeHtml(q)}</em>"</div>
+        <div style="color:#6b7280">We found these similar items — maybe one fits:</div>`;
+      resultsEl.appendChild(box);
+
+      if (!alternatives || alternatives.length === 0) {
+        const msg = document.createElement('div');
+        msg.style.padding = '12px';
+        msg.style.color = '#6b7280';
+        msg.textContent = 'No close alternatives found. Try different words (e.g., "hand accessory", "glove", "bangle").';
+        resultsEl.appendChild(msg);
+        return;
+      }
+
+      alternatives.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <div class="product-thumb"><img src="${p.image || 'https://via.placeholder.com/200x150?text=No+Image'}" alt="${escapeHtml(p.name)}"></div>
+          <div class="product-name">${escapeHtml(p.name)}</div>
+          <div class="product-price">QAR ${(Number(p.price)||0).toFixed(2)}</div>
+          <div class="meta">${escapeHtml(p.category || '')} ${p.sku ? '• SKU: ' + escapeHtml(p.sku) : ''}</div>
+          <div class="small">${escapeHtml((p.description||'').slice(0,100))}</div>
+          <button class="add-btn">Add to Cart</button>
+        `;
+        card.querySelector('.add-btn').addEventListener('click', e => {
+          e.stopPropagation(); addToCart(p); showToast('Added to cart');
+        });
+        card.addEventListener('click', () => window.location.href = `product.html?id=${p.id}`);
+        resultsEl.appendChild(card);
+      });
+    }
+
+    function renderResults(list) {
+      resultsEl.innerHTML = '';
+      if (!list || list.length === 0) {
+        resultsEl.innerHTML = '<div class="no-results">No matching items found. Try different words.</div>';
+        return;
+      }
+      list.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <div class="product-thumb">
+            <img src="${p.image || 'https://via.placeholder.com/200x150?text=No+Image'}" alt="${escapeHtml(p.name)}">
+          </div>
+          <div class="product-name">${escapeHtml(p.name)}</div>
+          <div class="product-price">QAR ${(Number(p.price)||0).toFixed(2)}</div>
+          <div class="meta">${escapeHtml(p.category || '')} ${p.sku ? '• SKU: ' + escapeHtml(p.sku) : ''}</div>
+          <div class="small">${escapeHtml((p.description || '').slice(0,100))}</div>
+          <button class="add-btn">Add to Cart</button>
+        `;
+        card.querySelector('.add-btn').addEventListener('click', e => {
+          e.stopPropagation();
+          addToCart(p);
+          showToast('Added to cart');
+        });
+        card.addEventListener('click', () => {
+          window.location.href = `product.html?id=${p.id}`;
+        });
+        resultsEl.appendChild(card);
+      });
+    }
+
+    function showToast(text) {
+      const t = document.createElement('div');
+      t.textContent = text;
+      Object.assign(t.style, {
+        position: 'fixed',
+        bottom: '20px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        background: '#143047',
+        color: '#fff',
+        padding: '8px 12px',
+        borderRadius: '8px',
+        zIndex: 9999
+      });
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 1500);
+    }
+
+    /* -------------------------
+       Cart logic (copied & integrated)
+       - uses localStorage 'cart'
+       - cart UI: #cart-toggle and #cart
+       - checkout opens WhatsApp with order summary
+       ------------------------- */
+
+    // WhatsApp checkout number (copied)
+    const WHATSAPP_NUMBER = '97451707046';
+
+    // cart stored in localStorage
+    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+    function formatPrice(n){ return 'QAR ' + (Number(n)||0).toFixed(2); }
+
+    function saveCart(){
+      localStorage.setItem('cart', JSON.stringify(cart));
+      localStorage.setItem('cart_last_update', Date.now());
+      renderCart();
+      updateCartCount();
+    }
+
+    const cartToggle = document.getElementById('cart-toggle');
+    const cartEl = document.getElementById('cart');
+    const cartRows = document.getElementById('cart-rows');
+    const subtotalEl = document.getElementById('subtotal');
+    const shippingEl = document.getElementById('shipping');
+    const totalEl = document.getElementById('total');
+    const checkoutBtn = document.getElementById('checkout-btn');
+    const cartCloseFooter = document.getElementById('cart-close-footer');
+
+    function updateCartCount(){
+      const qty = cart.reduce((s,i)=> s + (Number(i.quantity)||0), 0);
+      const badge = cartToggle.querySelector('.count');
+      if (badge) badge.textContent = qty;
+      cartToggle.setAttribute('aria-label', `Open cart — ${qty} items`);
+    }
+
+    function renderCart(){
+      cartRows.innerHTML = '';
+      if(!cart || cart.length === 0){
+        cartRows.textContent = 'Cart is empty.';
+      } else {
+        cart.forEach((it, i) => {
+          const row = document.createElement('div');
+          row.className = 'cart-row';
+
+          const img = document.createElement('img');
+          img.className = 'cart-img';
+          img.src = it.image || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><rect width="100%" height="100%" fill="%23eee"/></svg>';
+          img.alt = it.name || 'product';
+
+          const txt = document.createElement('div');
+          txt.className = 'cart-text';
+          const title = document.createElement('div');
+          title.textContent = it.name || 'Product';
+          const meta = document.createElement('div');
+          meta.textContent = `${formatPrice(it.price)} × ${it.quantity}`;
+          txt.appendChild(title);
+          txt.appendChild(meta);
+
+          const controls = document.createElement('div');
+          controls.className = 'cart-controls';
+
+          const inc = document.createElement('button');
+          inc.className = 'small-btn icon';
+          inc.textContent = '+';
+          inc.addEventListener('click', (e) => { e.stopPropagation(); cart[i].quantity++; saveCart(); });
+
+          const dec = document.createElement('button');
+          dec.className = 'small-btn icon';
+          dec.textContent = '-';
+          dec.addEventListener('click', (e) => { e.stopPropagation(); if (cart[i].quantity > 1) cart[i].quantity--; else cart.splice(i,1); saveCart(); });
+
+          const rem = document.createElement('button');
+          rem.className = 'small-btn';
+          rem.textContent = 'Remove';
+          rem.addEventListener('click', (e) => { e.stopPropagation(); cart.splice(i,1); saveCart(); });
+
+          controls.appendChild(inc);
+          controls.appendChild(dec);
+          controls.appendChild(rem);
+
+          row.appendChild(img);
+          row.appendChild(txt);
+          row.appendChild(controls);
+
+          cartRows.appendChild(row);
+        });
+      }
+
+      const subtotal = cart.reduce((s,i)=> s + (Number(i.price)||0) * i.quantity, 0);
+      const shipping = subtotal > 0 ? 10 : 0;
+      subtotalEl.textContent = 'Subtotal: ' + formatPrice(subtotal);
+      shippingEl.textContent = 'Shipping: ' + formatPrice(shipping);
+      totalEl.textContent = 'Total: ' + formatPrice(subtotal + shipping);
+    }
+
+    function openCart(){
+      cartEl.classList.remove('hidden');
+      cartEl.style.display = 'block';
+      cartEl.setAttribute('aria-hidden','false');
+      cartToggle.setAttribute('aria-expanded','true');
+      cartEl.scrollTop = 0;
+    }
+    function closeCart(){
+      cartEl.classList.add('hidden');
+      cartEl.setAttribute('aria-hidden','true');
+      cartToggle.setAttribute('aria-expanded','false');
+      setTimeout(()=>{ if(cartEl.classList.contains('hidden')) cartEl.style.display='none'; },220);
+    }
+    function toggleCart(){ if(cartEl.classList.contains('hidden')) openCart(); else closeCart(); }
+
+    cartToggle.addEventListener('click', toggleCart);
+    cartCloseFooter.addEventListener('click', closeCart);
+    checkoutBtn.addEventListener('click', checkoutWhatsApp);
+
+    window.addEventListener('storage', (e) => {
+      if(e.key === 'cart' || e.key === 'cart_last_update'){
+        try { cart = JSON.parse(localStorage.getItem('cart') || '[]'); } catch(err){ cart = []; }
+        renderCart();
+        updateCartCount();
+      }
+    });
+
+    // WhatsApp checkout (copied)
+    function checkoutWhatsApp() {
+      if (cart.length === 0) { alert('Cart is empty.'); return; }
+      let text = 'Order request — items:\n\n';
+      cart.forEach(it => text += `${it.name} — QAR ${it.price} × ${it.quantity}\n`);
+      const subtotal = cart.reduce((s,i)=> s + (Number(i.price)||0) * i.quantity, 0);
+      const shipping = subtotal > 0 ? 10 : 0;
+      text += `\nSubtotal: QAR ${subtotal.toFixed(2)}\nShipping: QAR ${shipping.toFixed(2)}\nTotal: QAR ${(subtotal+shipping).toFixed(2)}`;
+      const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
+      window.open(url, '_blank');
+    }
+
+    /* Override / integrate addToCart so product buttons use same cart representation
+       (keeps your product rendering unchanged, only ensures items go into the shared cart) */
+    function addToCart(p) {
+      // p expected to have id, name, price, image (from your product mapping)
+      let found = cart.find(i => i.id === p.id);
+      if (found) {
+        found.quantity = Number(found.quantity || 0) + 1;
+      } else {
+        const entry = {
+          id: p.id,
+          name: p.name || 'Product',
+          price: Number(p.price) || 0,
+          quantity: 1,
+          image: p.image || '',
+          link: window.location.href
+        };
+        cart.push(entry);
+      }
+      saveCart();
+      // open cart to show user the addition
+      openCart();
+    }
+
+    // helpers
+    function escapeHtml(s) { if (!s) return ''; return String(s).replace(/[&<>"'`=\/]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#x60;','/':'&#x2F;'}[c])); }
+
+    // wiring: search button + Enter + clear
+    document.getElementById('searchBtn').addEventListener('click', () => doSearch(searchInput.value));
+    document.getElementById('clearBtn').addEventListener('click', () => { searchInput.value = ''; renderResults([]); statusEl.textContent = ''; suggestionsEl.style.display = 'none'; });
+
+    // debounce user typing: suggestions and live preview
+    const onType = debounce(async () => {
+      const q = searchInput.value.trim();
+      if (!q) { suggestionsEl.style.display = 'none'; return; }
+      // show simple suggestions from Fuse
+      const sug = getLiveSuggestions(q, 8);
+      showSuggestions(sug);
+
+      // optionally live preview (small single-word queries): we won't auto-run full AI search on every keystroke
+    }, 180);
+
+    searchInput.addEventListener('input', onType);
+
+    // keyboard handling for suggestions
+    searchInput.addEventListener('keydown', (e) => {
+      const visible = suggestionsEl.style.display !== 'none';
+      if (visible && (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === 'Escape')) {
+        e.preventDefault();
+        if (e.key === 'ArrowDown') moveSuggestion(1);
+        else if (e.key === 'ArrowUp') moveSuggestion(-1);
+        else if (e.key === 'Enter') {
+          // if suggestion active, trigger it; else do full search
+          const active = suggestionsEl.querySelector('.suggestion-item.active');
+          if (active) { active.click(); }
+          else doSearch(searchInput.value);
+        } else if (e.key === 'Escape') { suggestionsEl.style.display = 'none'; }
+      } else if (e.key === 'Enter') {
+        // normal enter when suggestions not open
+        doSearch(searchInput.value);
+      }
+    });
+
+    // click outside closes suggestions
+    document.addEventListener('click', (ev) => {
+      if (!document.querySelector('.search-bar').contains(ev.target)) suggestionsEl.style.display = 'none';
+    });
+
+    // initial load
+    loadProducts();
+
+    // initial cart render
+    try { cart = JSON.parse(localStorage.getItem('cart') || '[]'); } catch(err){ cart = []; }
+    renderCart();
+    updateCartCount();
+
+    // expose for debugging
+    window._rongtuli_search = { products, doSearch, getLiveSuggestions, cart };
+  </script>
+</body>
+</html>
