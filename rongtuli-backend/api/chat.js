@@ -1,14 +1,20 @@
-export default async function handler(req, res) {
-  const allowedOrigin = 'https://rongtuli.site'; // only allow your domain
+import cors from 'cors';
 
-  const origin = req.headers.origin || req.headers.referer || '';
-  if (!origin.startsWith(allowedOrigin)) {
-    return res.status(403).json({ error: 'Forbidden: domain not allowed' });
+export default function handler(req, res) {
+  // Allow only your domain
+  const allowedOrigins = ['https://rongtuli.site'];
+  
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   }
 
-  // Your existing AI/chat logic
-  const { message } = req.body;
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
 
-  // Example response
-  res.status(200).json({ reply: 'Hello from AI!' });
+  // Your normal API logic here
+  res.json({ success: true });
 }
